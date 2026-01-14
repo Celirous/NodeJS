@@ -1,0 +1,1 @@
+alert("Hello AJ! This is NODE.JS. This is happening in the .js file");
