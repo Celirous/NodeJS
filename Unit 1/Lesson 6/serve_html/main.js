@@ -1,9 +1,9 @@
-const port = 3000;
-const http = require("http"); // Require the http module. this is a core node module so we dont need to install it
-const httpStatus = require("http-status-codes"); // Require the http-status-codes module.
+// const port = 3000;
+// const http = require("http"); // Require the http module. this is a core node module so we dont need to install it
+// const httpStatus = require("http-status-codes"); // Require the http-status-codes module.
 
-const fs = require("fs"); // Require the fs module. File System module, this is a core node module so we dont need to install it. fs, which interacts with the filesystem on behalf of your application. Through the fs module, your server can access and read your index.html or static files
-const { error } = require("console");
+// const fs = require("fs"); // Require the fs module. File System module, this is a core node module so we dont need to install it. fs, which interacts with the filesystem on behalf of your application. Through the fs module, your server can access and read your index.html or static files
+// const { error } = require("console");
 
 // EXAMPLE 1
 //===========
@@ -60,60 +60,107 @@ const { error } = require("console");
 // EXAMPLE 3
 //===========
 
-const sendErrorResponse = (res) => { // Create an errorhandling function.
-  res.writeHead(httpStatus.StatusCodes.NOT_FOUND, {
+// const sendErrorResponse = (res) => { // Create an errorhandling function.
+//   res.writeHead(httpStatus.StatusCodes.NOT_FOUND, {
+//     "Content-Type": "text/html",
+//   });
+//   res.write("<h1>File Not Found!</h1>");
+//   res.end();
+// };
+
+// const customReadFile = (file_path, res) => { // Look for a file by the name requested.
+//   if (fs.existsSync(file_path)) { // Check whether the file exists.
+//     fs.readFile(file_path, (error, data) => { // if it exists, read it
+//       if (error) { // send error message fs cannot read file, corupted file or something
+//         console.log(error);
+//         sendErrorResponse(res);
+//         return;
+//       }
+//       res.write(data); // if can read, output
+//       res.end();
+//     });
+//   } else {
+//     sendErrorResponse(res); // if file is not here, error message
+//     console.error(error); // this will give us the actual error in the console log
+//   }
+// };
+
+// http
+//   .createServer((req, res) => {
+//     let url = req.url; // Store the request’s URL in a variable url.
+//     if (url.indexOf(".html") !== -1) { // Check the URL to see whether it contains a file extension. the index value of -1 then it means it does not exists, so it says "if this is valid then we can read"
+//       res.writeHead(httpStatus.StatusCodes.OK, {
+//         "Content-Type": "text/html", //Customize the response’s content type.
+//       });
+//       customReadFile(`./views${url}`, res); // Call readFile to read file contents.
+//     } else if (url.indexOf(".js") !== -1) {
+//       res.writeHead(httpStatus.StatusCodes.OK, {
+//         "Content-Type": "text/javascript",
+//       });
+//       customReadFile(`./public/js${url}`, res);
+//     } else if (url.indexOf(".css") !== -1) {
+//       res.writeHead(httpStatus.StatusCodes.OK, {
+//         "Content-Type": "text/css",
+//       });
+//       customReadFile(`./public/css${url}`, res);
+//     } else if (url.indexOf(".png") !== -1) {
+//       res.writeHead(httpStatus.StatusCodes.OK, {
+//         "Content-Type": "image/png",
+//       });
+//       customReadFile(`./public/images${url}`, res);
+//     } else {
+//       sendErrorResponse(res);
+//     }
+//   })
+//   .listen(port);
+
+// console.log(`The server is listening on port number: ${port}`);
+
+// =======================================================
+
+// EXAMPLE 4
+//===========
+
+const port = 3000;
+  const http = require("http");
+  const httpStatusCodes = require("http-status-codes");
+  const router = require("./router");
+  fs = require("fs");
+  const plainTextContentType = {
+    "Content-Type": "text/plain",
+  };
+  const htmlContentType = {
     "Content-Type": "text/html",
-  });
-  res.write("<h1>File Not Found!</h1>");
-  res.end();
-};
+  },
 
-const customReadFile = (file_path, res) => { // Look for a file by the name requested.
-  if (fs.existsSync(file_path)) { // Check whether the file exists.
-    fs.readFile(file_path, (error, data) => { // if it exists, read it 
-      if (error) { // send error message fs cannot read file, corupted file or something 
-        console.log(error);
-        sendErrorResponse(res);
-        return;
+  customReadFile = (file, res) => {
+    fs.readFile(`./${file}`, (errors, data) => {
+      if (errors) {
+        console.log("Error reading the file...");
       }
-      res.write(data); // if can read, output
-      res.end();
+      res.end(data);
     });
-  } else {
-    sendErrorResponse(res); // if file is not here, error message
-    console.error(error); // this will give us the actual error in the console log
-  }
-};
+  };
 
-http
-  .createServer((req, res) => {
-    let url = req.url; // Store the request’s URL in a variable url.
-    if (url.indexOf(".html") !== -1) { // Check the URL to see whether it contains a file extension. the index value of -1 then it means it does not exists, so it says "if this is valid then we can read"
-      res.writeHead(httpStatus.StatusCodes.OK, {
-        "Content-Type": "text/html", //Customize the response’s content type.
-      }); 
-      customReadFile(`./views${url}`, res); // Call readFile to read file contents.
-    } else if (url.indexOf(".js") !== -1) {
-      res.writeHead(httpStatus.StatusCodes.OK, {
-        "Content-Type": "text/javascript",
-      });
-      customReadFile(`./public/js${url}`, res);
-    } else if (url.indexOf(".css") !== -1) {
-      res.writeHead(httpStatus.StatusCodes.OK, {
-        "Content-Type": "text/css",
-      });
-      customReadFile(`./public/css${url}`, res);
-    } else if (url.indexOf(".png") !== -1) {
-      res.writeHead(httpStatus.StatusCodes.OK, {
-        "Content-Type": "image/png",
-      });
-      customReadFile(`./public/images${url}`, res);
-    } else {
-      sendErrorResponse(res);
-    }
-  })
-  .listen(port);
+router.get("/", (req, res) => {
+  res.writeHead(httpStatusCodes.StatusCodes.OK, plainTextContentType);
+  res.end("Hey buddy, this is showing you the index output");
+});
 
-console.log(`The server is listening on port number: ${port}`);
+router.get("/index.html", (req, res) => {
+  res.writeHead(httpStatusCodes.StatusCodes.OK, htmlContentType);
+  customReadFile("views/index.html", res);
+});
 
+router.get("/contact.html", (req, res) => {
+  res.writeHead(httpStatusCodes.StatusCodes.OK, htmlContentType);
+  customReadFile("views/contact.html", res);
+});
 
+router.post("/", (req, res) => {
+  res.writeHead(httpStatusCodes.StatusCodes.OK, plainTextContentType);
+  res.end("POSTED");
+});
+
+http.createServer(router.handle).listen(port);
+console.log(`Hey there AJ, the server is listening on port number: ${port}`);
