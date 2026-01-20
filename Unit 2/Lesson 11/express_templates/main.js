@@ -1,6 +1,7 @@
 const port = 3000;
 const express = require("express");
 const homeController = require("./controllers/homeControllers");
+const errorController = require('./controllers/errorController');
 const app = express();
 const layouts = require("express-ejs-layouts");
 
@@ -18,12 +19,21 @@ app.use(
   })
 );
 app.use(express.json()); 
+
 app.use(layouts);
+
+app.use(express.static('/public'))
+
+app.use(errorController.logErrors);
 
 app.get("/name/:myName", homeController.respondWithName) //grabs infor from homeController and run the function respondWithName
 
-
+// we are going to add  these at the end of our file,because this is the thing that needs to 'hit' after we put in a bad path request above. 
+app.use(errorController.respondNoResourceFound); 
+app.use(errorController.respondInternalError);
 
 app.listen(port, () => {
   console.log(`Server running on port: ${port}`);
 });
+
+
