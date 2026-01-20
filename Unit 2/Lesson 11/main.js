@@ -1,0 +1,29 @@
+const port = 3000;
+const express = require("express");
+const homeController = require("./controllers/homeControllers");
+const app = express();
+const layouts = require("express-ejs-layouts");
+
+app.set("view engine", "ejs") //this is now the engine we will use for template displaying. "view engine" is the function, the "ejs" is what the engine we are going to use to show this template in views folder 
+app.use((req, res, next) => {
+  console.log(
+    `This is the second middleware that will be running. Request made to: ${req.url}`
+  );
+  next();
+});
+
+app.use(
+  express.urlencoded({ // this takes the data from raw binary data into a javascript object so that it is readable.
+    extended: false,
+  })
+);
+app.use(express.json()); 
+app.use(layouts);
+
+app.get("/name/:myName", homeController.respondWithName) //grabs infor from homeController and run the function respondWithName
+
+
+
+app.listen(port, () => {
+  console.log(`Server running on port: ${port}`);
+});
