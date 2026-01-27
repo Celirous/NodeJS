@@ -5,6 +5,8 @@ const errorController = require("./controllers/errorController");
 const Subscriber = require("./models/subscriber");
 const subscribersController = require("./controllers/subscribersControllers");
 const usersController = require("./controllers/usersController");
+
+const router = express.Router()
 const app = express();
 const layouts = require("express-ejs-layouts");
 
@@ -91,7 +93,15 @@ db.once("open", () => {
 //     console.error(error); //Run a query with a callback function to handle errors and data.
 //   });
 
+// =================== MIDDLE WARE =======================
+
+
+
+// ====== not middleware ======
 app.set("view engine", "ejs"); //this is now the engine we will use for template displaying. "view engine" is the function, the "ejs" is what the engine we are going to use to show this template in views folder
+// ====== end of not middleware ======
+
+
 app.use((req, res, next) => {
   console.log(
     `This is the second middleware that will be running. Request made to: ${req.url}`
@@ -105,22 +115,33 @@ app.use(
     extended: false,
   })
 );
+
 app.use(express.json());
 
 app.use(layouts);
 
 app.use(express.static("public"));
 
+app.use("/", router)
+
 app.use(errorController.logErrors);
 
-app.get("/name/:myName", homeController.respondWithName); //grabs infor from homeController and run the function respondWithName
+// router.get("/name/:myName", homeController.respondWithName); //grabs infor from homeController and run the function respondWithName
 
-app.get("/contact", subscribersController.getSubscriptionPage);
-app.post("/subscribe", subscribersController.saveSubscriber);
 
-app.get("/subscribers", subscribersController.getAllSubscribers, subscribersController.displaySubscribers);
+// =================== SUBSCRIBER ROUTES =======================
 
-app.get("/users", usersController.index, usersController.indexView)
+router.get("/contact", subscribersController.getSubscriptionPage);
+router.post("/subscribe", subscribersController.saveSubscriber);
+
+router.get("/subscribers", subscribersController.getAllSubscribers, subscribersController.displaySubscribers);
+
+
+// =================== USER ROUTES =======================
+
+router.get("/users", usersController.index, usersController.indexView)
+router.get("/users/new", usersController.new);
+router.post("/users/create", usersController.create, usersController.redirectView);
 
 // we are going to add  these at the end of our file,because this is the thing that needs to 'hit' after we put in a bad path request above.
 app.use(errorController.respondNoResourceFound);
