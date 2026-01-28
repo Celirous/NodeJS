@@ -6,6 +6,8 @@ const Subscriber = require("./models/subscriber");
 const subscribersController = require("./controllers/subscribersControllers");
 const usersController = require("./controllers/usersController");
 
+const methodOverride = require("method-override");
+
 const router = express.Router()
 const app = express();
 const layouts = require("express-ejs-layouts");
@@ -122,6 +124,10 @@ app.use(layouts);
 
 app.use(express.static("public"));
 
+router.use(methodOverride("_method", {
+  methods: ["POST", "GET"] //Configure the application router to use methodOverride as middleware.
+})); 
+
 app.use("/", router)
 
 app.use(errorController.logErrors);
@@ -143,6 +149,12 @@ router.get("/users", usersController.index, usersController.indexView)
 router.get("/users/new", usersController.new);
 router.post("/users/create", usersController.create, usersController.redirectView);
 router.get("/users/:id", usersController.show, usersController.showView)
+
+router.get("/users/:id/edit", usersController.edit);
+router.put("/users/:id/update", usersController.update, usersController.redirectView);
+
+router.delete("/users/:id/delete", usersController.delete, usersController.redirectView)
+
 
 // we are going to add  these at the end of our file,because this is the thing that needs to 'hit' after we put in a bad path request above.
 app.use(errorController.respondNoResourceFound);
