@@ -13,7 +13,11 @@ module.exports = {
   },
 
   indexView: (req, res) => {
-    res.render("users/index");
+    res.render("users/index", {
+      flashMessages: {
+        success: "Loaded all users!"
+      }
+    })
   },
 
   new: (req, res) => {
@@ -21,32 +25,43 @@ module.exports = {
   },
 
   create: async (req, res, next) => {
-    try {
-      let userParams = {
+    const getUserParams = (body) => {
+      return {
         name: {
-          first: req.body.first,
-          last: req.body.last,
+          first: body.first,
+          last: body.last,
         },
-        email: req.body.email,
-        password: req.body.password,
-        zipCode: req.body.zipCode,
+        email: body.email,
+        password: body.password,
+        zipCode: body.zipCode,
       };
+    };
+
+    try {
+      let userParams = getUserParams(req.body);
 
       const user = await User.create(userParams);
+      req.flash("success", `${user.fullName}'s account created successfully!`);
+
       res.locals.redirect = "/users";
       res.locals.user = user;
       next();
     } catch (error) {
       console.log(`Error saving user: ${error.message}`);
-      next(error);
+
+      res.locals.redirect = "/users/new";
+      req.flash(
+        "error", `Failed to create user account because: ➥${error.message}.`
+      );
+
+      next();
     }
   },
 
   redirectView: (req, res, next) => {
     let redirectPath = res.locals.redirect;
     if (redirectPath) res.redirect(redirectPath);
-    else 
-      next();
+    else next();
   },
 
   show: async (req, res, next) => {
