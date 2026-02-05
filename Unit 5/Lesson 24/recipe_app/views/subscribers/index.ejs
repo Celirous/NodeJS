@@ -1,6 +1,7 @@
-<a class="button" href="/subscribers/new">Add Subsriber</a>
+<a class="button" href="/subscribers/new">Add Subscriber</a>
+<br>
 
-<h2 class="center">Subscribers Table</h2>
+<h2>Subscibers Table</h2>
 <table class="table">
   <thead>
     <tr>
@@ -27,7 +28,7 @@
         </a>
       </td>
       <td>
-        <a href="<%= `subscribers/${subscriber._id}/delete?_method=DELETE` %>" onclick="return confirm('Are you sure you want to delete this record?')" a>Delete</a>
+        <a href="<%= `subscribers/${subscriber._id}/delete?_method=DELETE` %>" onclick="return confirm('Are you sure you want to delete this record?')">Delete</a>
       </td>
     </tr>
     <% }); %>

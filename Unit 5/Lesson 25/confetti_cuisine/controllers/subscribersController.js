@@ -24,7 +24,11 @@ module.exports = {
   },
 
   indexView: (req, res) => {
-    res.render("subscribers/index");
+    res.render("subscribers/index", {
+      flashMessages: {
+        success: "Loaded all subscribers!",
+      },
+    });
   },
 
   new: (req, res) => {
@@ -92,6 +96,7 @@ module.exports = {
       res.locals.redirect = `/subscribers/${subscriberId}`;
       res.locals.subscriber = subscriber;
       console.log(`subscriberParams after: ${subscriber}`);
+      req.flash("success", `Edited succesfully`);
       next();
     } catch (error) {
       console.log(`Error updating subscriber by ID: ${error.message}`);

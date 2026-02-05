@@ -3,31 +3,17 @@ const validator = require("express-validator");
 const { body, validationResult } = require("express-validator");
 const passport = require("passport");
 
-const getUserParams = (body) => {
-  return {
-    name: {
-      first: body.first,
-      last: body.last,
-    },
-    email: body.email,
-    password: body.password,
-    zipCode: body.zipCode,
-  };
-};
-
 module.exports = {
   index: async (req, res, next) => {
     try {
       const users = await User.find();
       res.locals.users = users;
-      console.log(`Found users: ${users}`);
       next();
     } catch (error) {
       console.log(`Error fetching users: ${error.message}`);
       next(error);
     }
   },
-
   indexView: (req, res) => {
     res.render("users/index", {
       flashMessages: {
@@ -36,28 +22,15 @@ module.exports = {
     });
   },
 
-  login: (req, res) => {
-    res.render("users/login");
-  },
-
   new: (req, res) => {
-    res.render("users/new");
+    res.render("users/new", {
+      user: res.locals.user || {
+        name: { first: "", last: "" },
+        email: "",
+        zipCode: "",
+      },
+    });
   },
-
-  // create: async (req, res, next) => {
-  //   try {
-  //     let userParams = getUserParams(req.body);
-  //     console.log(userParams);
-  //     const user = await User.create(userParams);
-  //     res.locals.redirect = "/users";
-  //     res.locals.user = user;
-  //     console.log(`Created user: ${user}`);
-  //     next();
-  //   } catch (error) {
-  //     console.log(`Error saving user: ${error.message}`);
-  //     next(error);
-  //   }
-  // },
 
   create: async (req, res, next) => {
     const getUserParams = (body) => {
@@ -110,7 +83,6 @@ module.exports = {
       let userId = req.params.id;
       const user = await User.findById(userId);
       res.locals.user = user;
-      console.log(`found user info: ${user}`);
       next();
     } catch (error) {
       console.log(`Error fetching user by ID: ${error.message}`);
@@ -124,11 +96,10 @@ module.exports = {
 
   edit: async (req, res, next) => {
     let userId = req.params.id;
+
     try {
       let user = await User.findById(userId);
-      res.render("users/edit", {
-        user: user,
-      });
+      res.render("users/edit", { user: user });
     } catch (error) {
       console.log(`Error fetching user by ID: ${error.message}`);
       next(error);
@@ -137,18 +108,20 @@ module.exports = {
 
   update: async (req, res, next) => {
     let userId = req.params.id;
-    let userParams = getUserParams(req.body);
-    console.log(
-      `userParams before: name:${userParams.name} | email:${userParams.email} | zipCode:${userParams.zipCode}`,
-    );
+    let userParams = {
+      name: {
+        first: req.body.first,
+        last: req.body.last,
+      },
+      email: req.body.email,
+      password: req.body.password,
+      zipCode: req.body.zipCode,
+    };
+
     try {
-      let user = await User.findByIdAndUpdate(userId, {
-        $set: userParams,
-      });
+      let user = await User.findByIdAndUpdate(userId, { $set: userParams });
       res.locals.redirect = `/users/${userId}`;
       res.locals.user = user;
-      console.log(`userParams after: ${user}`);
-      req.flash("success", `Edited succesfully`);
       next();
     } catch (error) {
       console.log(`Error updating user by ID: ${error.message}`);
@@ -158,18 +131,21 @@ module.exports = {
 
   delete: async (req, res, next) => {
     let userId = req.params.id;
+
     try {
       await User.findByIdAndDelete(userId);
       res.locals.redirect = "/users";
-      console.log(`deleted User: ${userId}`);
-      req.flash("success", `User deleted successfully!`);
       next();
     } catch (error) {
       console.log(`Error deleting user by ID: ${error.message}`);
       next(error);
     }
   },
-  
+
+  login: (req, res) => {
+    res.render("users/login");
+  },
+
   authenticate: (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
       if (err) {
@@ -199,6 +175,36 @@ module.exports = {
       next();
     });
   },
+
+  // validate: async (req, res, next) => {
+  //   // Validate and sanitize fields
+  //   req.sanitizeBody("email").normalizeEmail({ all_lowercase: true }).trim();
+  //   req.check("email", "Email is invalid").isEmail();
+  //   req
+  //     .check("zipCode", "Zip code is invalid")
+  //     .notEmpty()
+  //     .isInt()
+  //     .isLength({ min: 5, max: 5 })
+  //   req.check("password", "Password cannot be empty").notEmpty();
+
+  //   try {
+  //     // Collect the results of previous validations
+  //     const error = await req.getValidationResult();
+
+  //     if (!error.isEmpty()) {
+  //       let messages = error.array().map((e) => e.msg);
+  //       req.skip = true; // Set skip property to true
+  //       req.flash("error", messages.join(" and "));
+  //       res.locals.redirect = "/users/new";
+  //       next();
+  //     } else {
+  //       next();
+  //     }
+  //   } catch (err) {
+  //     console.log(`Error in validation: ${err.message}`);
+  //     next(err);
+  //   }
+  // },
 
   validate: [
     // Validation and sanitization chains

@@ -7,12 +7,14 @@ const errorController = require("./controllers/errorController");
 const mongoose = require("mongoose");
 const subscribersController = require("./controllers/subscribersController");
 const userController = require("./controllers/userController");
+const courseController = require("./controllers/coursesController");
 const methodOverride = require("method-override");
 const connectFlash = require("connect-flash")
 const cookieParser = require("cookie-parser");
 const expressSession = require("express-session");
-const expressValidator = require("express-validator")
+// const expressValidator = require("express-validator")
 const User = require("./models/user");
+const passport = require("passport");
 
 const app = express();
 const router = express.Router();
@@ -71,10 +73,16 @@ router.use(
 
 router.use(connectFlash());
 
+router.use(passport.initialize());
+router.use(passport.session());
+
 router.use((req, res, next) => {
   res.locals.flashMessages = req.flash();
+  res.locals.loggedIn = req.isAuthenticated(); // Passport method to check if user is logged in
+  res.locals.currentUser = req.user; // The logged-in user object
   next();
 });
+
 
 router // Method override for PUT and DELETE requests via forms
   .use(
@@ -83,7 +91,11 @@ router // Method override for PUT and DELETE requests via forms
     }),
   );
 
-router.use(expressValidator())
+// router.use(expressValidator())
+
+passport.use(User.createStrategy()); // this is how we are going to authenticate user. This is a passport method
+passport.serializeUser(User.serializeUser()); // this is going to take the login info, store it in the session cookie and verify it with the current user cookie. This is for making sure that requests we make (form updates and stuff).
+passport.deserializeUser(User.deserializeUser()); // this will take the user session cookie and then compare it to the current user to confirm it is the correct user making these changes
 
 app.use("/", router);
 
@@ -96,6 +108,30 @@ app.use("/", router);
 // ===============================
 app.get("/", homeController.displayHomePage);
 app.get("/courses", homeController.showCourses);
+
+// ===============================================================================================================
+//                    COURSE ROUTES
+// ===============================================================================================================
+
+router.get("/courses", courseController.showCourses);
+router.get("/courses/new", courseController.new);
+router.post(
+  "/courses/create",
+  courseController.create,
+  courseController.redirectView,
+);
+router.get("/courses/:id", courseController.show, courseController.showView);
+router.get("/courses/:id/edit", courseController.edit);
+router.put(
+  "/courses/:id/update",
+  courseController.update,
+  courseController.redirectView,
+);
+router.delete(
+  "/courses/:id/delete",
+  courseController.delete,
+  courseController.redirectView,
+);
 
 // ===============================
 // Subscriber Routes
@@ -135,13 +171,16 @@ router.delete(
 
 router.get("/users/login", userController.login);
 router.post("/users/login", userController.authenticate);
-// router.get(
-//   "/users/logout",
-//   userController.logout,
-//   usersController.redirectView,
-// );
+
+router.get(
+  "/users/logout",
+  userController.logout,
+  userController.redirectView,
+);
+
 router.get("/users", userController.index, userController.indexView);
 router.get("/users/new", userController.new);
+
 router.post(
   "/users/create",
   userController.validate,

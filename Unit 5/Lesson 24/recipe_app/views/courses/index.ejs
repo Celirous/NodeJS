@@ -1,6 +1,6 @@
 <a class="button" href="/courses/new">Create Course</a>
 
-<h2 class="center">Courses Table</h2>
+<h2>Courses Table</h2>
 <table class="table">
   <thead>
     <tr>
@@ -27,7 +27,7 @@
         </a>
       </td>
       <td>
-        <a href="<%= `courses/${course._id}/delete?_method=DELETE` %>" onclick="return confirm('Are you sure you want to delete this record?')" a>Delete</a>
+        <a href="<%= `courses/${course._id}/delete?_method=DELETE` %>" onclick="return confirm('Are you sure you want to delete this record?')">Delete</a>
       </td>
     </tr>
     <% }); %>
