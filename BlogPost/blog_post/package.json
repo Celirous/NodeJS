@@ -1,0 +1,21 @@
+{
+  "name": "blog_post",
+  "version": "1.0.0",
+  "description": "Blog Post WebApp",
+  "license": "ISC",
+  "author": "AJ B",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "mongoose": "^9.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
