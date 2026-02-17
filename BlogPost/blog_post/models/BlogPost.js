@@ -10,7 +10,8 @@ const BlogPostSchema = new Schema({
     type: Date,
     default: new Date()
   },
-  
+
+  image: String,
   username: String,
 });
 
