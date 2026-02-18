@@ -11,9 +11,11 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
     "express-fileupload": "^1.5.2",
+    "express-session": "^1.19.0",
     "mongoose": "^9.2.1"
   },
   "devDependencies": {

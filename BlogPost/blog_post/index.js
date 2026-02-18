@@ -6,15 +6,23 @@ const app = new express();
 const mongoose = require("mongoose");
 // const BlogPost = require("./models/BlogPost.js");
 
+const newPostController = require("./controllers/newPost");
+const homeController = require("./controllers/home");
+const storePostController = require("./controllers/storePost");
+const getPostController = require("./controllers/getPost");
+const aboutController = require("./controllers/about");
+const contactController = require("./controllers/contact");
+const newUserController = require("./controllers/newUser");
+const storeUserController = require("./controllers/storeUser");
+const loginController = require("./controllers/login");
+const loginUserController = require("./controllers/loginUser");
+const logoutController = require('./controllers/logout');
 
-const newPostController = require('./controllers/newPost');
-const homeController = require('./controllers/home');
-const storePostController = require('./controllers/storePost');
-const getPostController = require('./controllers/getPost');
-const aboutController = require('./controllers/about')
-const contactController = require('./controllers/contact')
+const validateMiddleWare = require("./middleware/validationMiddleware");
+const authMiddleware = require("./middleware/authMiddleware");
+const redirectIfAuthenticatedMiddleware = require("./middleware/redirectIfAuthenticatedMiddleware");
 
-const validateMiddleWare = require('./middleware/validationMiddleware');
+const expressSession = require("express-session");
 
 // const validateMiddleWare = (req, res, next) => {
 //   if (req.files == null || req.body.title == null) {
@@ -45,9 +53,23 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 
-app.use('/posts/store',validateMiddleWare)
+app.use(
+  expressSession({
+    secret: "keyboard cat",
+  }),
+);
 
 app.use(fileUpload());
+
+app.post("/posts/store", authMiddleware, storePostController);
+app.get("/posts/new", authMiddleware, newPostController);
+
+global.loggedIn = null;
+
+app.use((req, res, next) => {
+  global.loggedIn = req.session.userId;
+  next();
+});
 
 // ===============================
 // Routes
@@ -93,12 +115,27 @@ app.use(fileUpload());
 //   );
 // });
 
-app.get('/',homeController)
-app.get('/post/:id',getPostController)
-app.post('/posts/store', storePostController)
-app.get('/posts/new',newPostController);
-app.get('/about',aboutController);
-app.get('/contact', contactController);
+app.get("/", homeController);
+app.get("/post/:id", getPostController);
+app.post("/posts/store", storePostController);
+app.get("/posts/new", newPostController);
+app.get("/about", aboutController);
+app.get("/contact", contactController);
+app.get("/auth/register", redirectIfAuthenticatedMiddleware, newUserController);
+app.post(
+  "/users/register",
+  redirectIfAuthenticatedMiddleware,
+  storeUserController,
+);
+app.get("/auth/login", redirectIfAuthenticatedMiddleware, loginController);
+app.post(
+  "/users/login",
+  redirectIfAuthenticatedMiddleware,
+  loginUserController,
+);
+app.get('/auth/logout', logoutController);
+
+app.use((req, res) => res.render('notfound'));
 
 // ===============================
 // Starting the app
