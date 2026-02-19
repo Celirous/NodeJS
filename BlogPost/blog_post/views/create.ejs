@@ -3,11 +3,8 @@
   <%- include('layouts/header'); -%>
 
   <body>
-    <!-- Navigation-->
-
     <%- include('layouts/navbar'); -%>
 
-    <!-- Page Header-->
     <header
       class="masthead"
       style="background-image: url(&quot;/assets/img/contact-bg.jpg&quot;)"
@@ -23,20 +20,20 @@
         </div>
       </div>
     </header>
-    <!-- Main Content-->
+
     <main class="mb-4">
       <div class="container px-4 px-lg-5">
         <div class="row gx-4 gx-lg-5 justify-content-center">
           <div class="col-md-10 col-lg-8 col-xl-7">
-            <p>Create a new Post from here:</p>
+            <!-- <p>Create a new Post from here:</p> -->
             <div class="my-5">
-              <!-- * * * * * * * * * * * * * * *-->
-              <!-- * * SB Forms Contact Form * *-->
-              <!-- * * * * * * * * * * * * * * *-->
-              <!-- This form is pre-integrated with SB Forms.-->
-              <!-- To make this form functional, sign up at-->
-              <!-- https://startbootstrap.com/solution/contact-forms-->
-              <!-- to get an API token!-->
+              <% if (errors != null && errors.length > 0) { %>
+              <ul class="list-group mb-3">
+                <% for (var i = 0; i < errors.length; i++) { %>
+                <li class="list-group-item list-group-item-danger"><%= errors[i] %></li>
+                <% } %>
+              </ul>
+              <% } %>
               <form
                 id="contactForm"
                 action="/posts/store"
@@ -51,6 +48,7 @@
                     placeholder="Enter your Title..."
                     data-sb-validations="required"
                     name="title"
+                    value="<%= title %>"
                   />
                   <label for="title">Title</label>
                   <div
@@ -69,20 +67,26 @@
                     style="height: 12rem"
                     data-sb-validations="required"
                     name="body"
-                  ></textarea>
-                  <label for="body">Blog Body</label>
+                  ><%= body %></textarea>
+                  <!-- <label for="body">Blog Body</label> -->
                   <div
                     class="invalid-feedback"
                     data-sb-feedback="body:required"
                   >
                     A body is required.
+                    <script>
+                      $('#body').summernote({
+                      placeholder: 'Blog Body',
+                      tabsize: 2,
+                      height: 200
+                      });
+                      </script>
                   </div>
                 </div>
 
                 <div class="control-group">
                   <div class="form-group floating-label-form-group controls">
                     <label>Upload an Image for your post here:</label>
-                     
                     <input
                       type="file"
                       class="form-control"
@@ -94,7 +98,6 @@
 
                 <br />
 
-                <!-- Submit Button-->
                 <button
                   class="btn btn-primary text-uppercase"
                   id="submitButton"
@@ -108,12 +111,8 @@
         </div>
       </div>
     </main>
-    <!-- Footer-->
 
     <%- include('layouts/footer'); -%>
-
-    <!-- Scripts-->
-
     <%- include('layouts/scripts'); -%>
   </body>
 </html>

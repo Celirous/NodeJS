@@ -5,6 +5,7 @@ const fileUpload = require("express-fileupload");
 const app = new express();
 const mongoose = require("mongoose");
 // const BlogPost = require("./models/BlogPost.js");
+const flash = require('connect-flash');
 
 const newPostController = require("./controllers/newPost");
 const homeController = require("./controllers/home");
@@ -18,7 +19,8 @@ const loginController = require("./controllers/login");
 const loginUserController = require("./controllers/loginUser");
 const logoutController = require('./controllers/logout');
 
-const validateMiddleWare = require("./middleware/validationMiddleware");
+
+// const validateMiddleWare = require("./middleware/validationMiddleware");
 const authMiddleware = require("./middleware/authMiddleware");
 const redirectIfAuthenticatedMiddleware = require("./middleware/redirectIfAuthenticatedMiddleware");
 
@@ -60,9 +62,7 @@ app.use(
 );
 
 app.use(fileUpload());
-
-app.post("/posts/store", authMiddleware, storePostController);
-app.get("/posts/new", authMiddleware, newPostController);
+app.use(flash());
 
 global.loggedIn = null;
 
@@ -117,8 +117,8 @@ app.use((req, res, next) => {
 
 app.get("/", homeController);
 app.get("/post/:id", getPostController);
-app.post("/posts/store", storePostController);
-app.get("/posts/new", newPostController);
+app.post("/posts/store", authMiddleware, storePostController);
+app.get("/posts/new", authMiddleware, newPostController);
 app.get("/about", aboutController);
 app.get("/contact", contactController);
 app.get("/auth/register", redirectIfAuthenticatedMiddleware, newUserController);
